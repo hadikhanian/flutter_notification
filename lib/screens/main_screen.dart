@@ -15,12 +15,12 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final _formKey = GlobalKey<FormState>();
   final _appKeyController = TextEditingController();
-  final _hostController = TextEditingController();
+  final _hostController = TextEditingController(text: 'ws1.binacity.com');
   final _portController = TextEditingController(text: '443');
-  final _channelController = TextEditingController();
+  final _channelController = TextEditingController(text: 'private-Ecommerce.Orders.All');
   final _eventNameController = TextEditingController(text: 'CreateOrderEvent');
   final _authTokenController = TextEditingController();
-  final _authEndpointController = TextEditingController();
+  final _authEndpointController = TextEditingController(text: 'https://test.binacity.com/broadcasting/auth');
 
   final WebSocketService _wsService = WebSocketService();
   final NotificationService _notificationService = NotificationService();
