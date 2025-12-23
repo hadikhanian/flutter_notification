@@ -16,7 +16,16 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateMixin {
+class _MainScreenState extends State<MainScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _appKeyController = TextEditingController();
+  final _hostController = TextEditingController(text: 'ws1.binacity.com');
+  final _portController = TextEditingController(text: '443');
+  final _channelController = TextEditingController(text: 'private-Ecommerce.Orders.All');
+  final _eventNameController = TextEditingController(text: 'CreateOrderEvent');
+  final _authTokenController = TextEditingController();
+  final _authEndpointController = TextEditingController(text: 'https://test.binacity.com/broadcasting/auth');
+
   final WebSocketService _wsService = WebSocketService();
   final NotificationService _notificationService = NotificationService();
   final SettingsService _settingsService = SettingsService();

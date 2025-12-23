@@ -27,9 +27,9 @@ class WebSocketService {
 
   // تنظیمات Laravel Reverb
   String _appKey = '';
-  String _host = '';
+  String _host = 'ws1.binacity.com';
   int _port = 443;
-  String _channelName = '';
+  String _channelName = 'private-Ecommerce.Orders.All';
   String _eventName = 'CreateOrderEvent';
   String _socketId = '';
   String? _authToken;

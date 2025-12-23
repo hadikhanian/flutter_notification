@@ -18,7 +18,7 @@ void main() async {
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.normal,
-    title: 'سیستم اعلان',
+    title: 'سیستم اعلان سفارشات',
   );
 
   await windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -40,26 +40,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: AppConfig.appTitle,
       debugShowCheckedModeBanner: false,
-      theme: AppConfig.getTheme(),
-
-      // RTL support
-      locale: const Locale('fa', 'IR'),
-      supportedLocales: const [
-        Locale('fa', 'IR'),
-        Locale('en', 'US'),
-      ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      builder: (context, child) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: child!,
-        );
-      },
-
+      theme: ThemeData(
+        primarySwatch: Colors.orange,
+        useMaterial3: true,
+        fontFamily: 'Vazir', // فونت فارسی - نیاز به اضافه کردن به assets دارد
+      ),
       home: const MainScreen(),
     );
   }
