@@ -12,7 +12,6 @@ dependencies:
 
   # WebSocket support
   web_socket_channel: ^2.4.0
-  pusher_channels_flutter: ^2.2.1
 
   # Notifications
   flutter_local_notifications: ^16.3.0

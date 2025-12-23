@@ -12,10 +12,12 @@
 - **انیمیشن جذب توجه**: پنجره با انیمیشن‌های scale و rotation توجه کاربر را جلب می‌کند
 
 ### 🔌 اتصال به Laravel Reverb
-- اتصال WebSocket به Laravel Reverb
+- اتصال مستقیم WebSocket به Laravel Reverb (بدون نیاز به plugin)
+- پشتیبانی کامل از **Public و Private Channel**
 - پشتیبانی از Events سفارشی
-- اتصال مجدد خودکار در صورت قطع شدن
+- Authorization با Bearer Token برای Private Channel
 - نمایش وضعیت اتصال به صورت Real-time
+- پشتیبانی از wss:// برای اتصال امن
 
 ### 📱 رابط کاربری
 - پنل تنظیمات برای وارد کردن اطلاعات اتصال
@@ -118,13 +120,41 @@ flutter build macos --release
 
 ### Laravel Reverb Settings
 
-| فیلد | توضیحات | مثال |
-|------|---------|------|
-| **App Key** | کلید application از فایل `.env` Laravel | `local` یا app key خود |
-| **Host** | آدرس سرور Laravel Reverb | `ws://127.0.0.1` یا `wss://yourdomain.com` |
-| **Port** | پورت Reverb (پیش‌فرض 6001) | `6001` |
-| **Channel Name** | نام Channel که در Laravel تعریف شده | `orders` |
-| **Event Name** | نام Event که broadcast می‌شود | `CreateOrderEvent` |
+| فیلد | توضیحات | مثال | الزامی |
+|------|---------|------|--------|
+| **App Key** | کلید application از فایل `.env` Laravel | `ICS7DPZtPJyrRLjNFDBcsTiDzkNrj4QA` | ✅ |
+| **Host** | آدرس سرور Laravel Reverb (بدون پروتکل) | `ws1.binacity.com` | ✅ |
+| **Port** | پورت Reverb | `443` (wss) یا `6001` (ws) | ✅ |
+| **Channel Name** | نام Channel (برای Private باید با `private-` شروع شود) | `orders` یا `private-Ecommerce.Orders.All` | ✅ |
+| **Event Name** | نام Event که broadcast می‌شود | `CreateOrderEvent` | ✅ |
+| **Auth Token** | Bearer token برای Private Channel | `1|xxxxxxxxxxxxx` | ❌ (فقط برای Private) |
+| **Auth Endpoint** | URL endpoint برای authorization | `https://your-domain.com/api/broadcasting/auth` | ❌ (فقط برای Private) |
+
+### مثال تنظیمات Public Channel
+
+```
+App Key: ICS7DPZtPJyrRLjNFDBcsTiDzkNrj4QA
+Host: ws1.binacity.com
+Port: 443
+Channel Name: orders
+Event Name: CreateOrderEvent
+Auth Token: (خالی بگذارید)
+Auth Endpoint: (خالی بگذارید)
+```
+
+### مثال تنظیمات Private Channel
+
+```
+App Key: ICS7DPZtPJyrRLjNFDBcsTiDzkNrj4QA
+Host: ws1.binacity.com
+Port: 443
+Channel Name: private-Ecommerce.Orders.All
+Event Name: CreateOrderEvent
+Auth Token: 1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Auth Endpoint: https://ws1.binacity.com/api/broadcasting/auth
+```
+
+**📖 راهنمای کامل Private Channel**: برای جزئیات بیشتر درباره استفاده از Private Channel، فایل [PRIVATE_CHANNEL_GUIDE.md](PRIVATE_CHANNEL_GUIDE.md) را مطالعه کنید.
 
 ### مثال تنظیمات Laravel
 
@@ -253,12 +283,12 @@ flutter_notification/
 ## 📦 Dependencies
 
 - `flutter` - فریمورک اصلی
-- `pusher_channels_flutter` - اتصال به Pusher/Reverb
+- `web_socket_channel` - اتصال مستقیم WebSocket به Laravel Reverb
 - `flutter_local_notifications` - Notification های سیستمی
 - `audioplayers` - پخش صدا
 - `window_manager` - مدیریت پنجره برای always-on-top
 - `provider` - State management
-- `http` - درخواست‌های HTTP
+- `http` - درخواست‌های HTTP برای authorization
 - `json_annotation` - JSON serialization
 
 ## 📝 توجهات مهم

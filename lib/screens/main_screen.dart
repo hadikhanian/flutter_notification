@@ -16,9 +16,11 @@ class _MainScreenState extends State<MainScreen> {
   final _formKey = GlobalKey<FormState>();
   final _appKeyController = TextEditingController();
   final _hostController = TextEditingController();
-  final _portController = TextEditingController(text: '6001');
+  final _portController = TextEditingController(text: '443');
   final _channelController = TextEditingController();
   final _eventNameController = TextEditingController(text: 'CreateOrderEvent');
+  final _authTokenController = TextEditingController();
+  final _authEndpointController = TextEditingController();
 
   final WebSocketService _wsService = WebSocketService();
   final NotificationService _notificationService = NotificationService();
@@ -79,15 +81,18 @@ class _MainScreenState extends State<MainScreen> {
     });
 
     try {
+      final authToken = _authTokenController.text.trim();
+      final authEndpoint = _authEndpointController.text.trim();
+
       await _wsService.initialize(
         appKey: _appKeyController.text.trim(),
         host: _hostController.text.trim(),
         port: int.parse(_portController.text.trim()),
         channelName: _channelController.text.trim(),
         eventName: _eventNameController.text.trim(),
+        authToken: authToken.isEmpty ? null : authToken,
+        authEndpoint: authEndpoint.isEmpty ? null : authEndpoint,
       );
-
-      await _wsService.subscribeToChannel();
 
       setState(() {
         _isConnected = true;
@@ -211,6 +216,34 @@ class _MainScreenState extends State<MainScreen> {
                         hint: 'CreateOrderEvent',
                         icon: Icons.event,
                         enabled: !_isConnected,
+                      ),
+                      const SizedBox(height: 20),
+                      const Divider(),
+                      const Text(
+                        'تنظیمات Private Channel (اختیاری)',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      _buildTextField(
+                        controller: _authTokenController,
+                        label: 'Auth Token',
+                        hint: 'Bearer token برای authorization',
+                        icon: Icons.vpn_key,
+                        enabled: !_isConnected,
+                        required: false,
+                      ),
+                      const SizedBox(height: 15),
+                      _buildTextField(
+                        controller: _authEndpointController,
+                        label: 'Auth Endpoint',
+                        hint: 'https://your-domain.com/broadcasting/auth',
+                        icon: Icons.link,
+                        enabled: !_isConnected,
+                        required: false,
                       ),
                       const SizedBox(height: 30),
                       SizedBox(
@@ -375,6 +408,7 @@ class _MainScreenState extends State<MainScreen> {
     required String hint,
     required IconData icon,
     bool enabled = true,
+    bool required = true,
     TextInputType? keyboardType,
   }) {
     return TextFormField(
@@ -389,12 +423,14 @@ class _MainScreenState extends State<MainScreen> {
         filled: true,
         fillColor: enabled ? Colors.white : Colors.grey[200],
       ),
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'این فیلد الزامی است';
-        }
-        return null;
-      },
+      validator: required
+          ? (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'این فیلد الزامی است';
+              }
+              return null;
+            }
+          : null,
     );
   }
 
@@ -409,6 +445,8 @@ class _MainScreenState extends State<MainScreen> {
     _portController.dispose();
     _channelController.dispose();
     _eventNameController.dispose();
+    _authTokenController.dispose();
+    _authEndpointController.dispose();
     _wsService.dispose();
     _notificationService.dispose();
     super.dispose();
