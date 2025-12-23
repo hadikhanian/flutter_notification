@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:io' show Platform;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../models/order_event.dart';
@@ -9,76 +10,101 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _notifications =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin? _notifications;
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   bool _isInitialized = false;
   bool _isSoundPlaying = false;
-  Timer? _soundLoopTimer;
+  bool _notificationSupported = false;
 
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    // تنظیمات Android
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    try {
+      // فقط برای Android, iOS, و Linux تلاش کنیم notification را initialize کنیم
+      if (Platform.isAndroid || Platform.isIOS || Platform.isLinux) {
+        _notifications = FlutterLocalNotificationsPlugin();
 
-    // تنظیمات iOS
-    const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+        // تنظیمات Android
+        const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    // تنظیمات Linux
-    const linuxSettings = LinuxInitializationSettings(
-      defaultActionName: 'Open notification',
-    );
+        // تنظیمات iOS
+        const iosSettings = DarwinInitializationSettings(
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
 
-    const initSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-      linux: linuxSettings,
-    );
+        // تنظیمات Linux
+        const linuxSettings = LinuxInitializationSettings(
+          defaultActionName: 'Open notification',
+        );
 
-    await _notifications.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: _onNotificationTapped,
-    );
+        const initSettings = InitializationSettings(
+          android: androidSettings,
+          iOS: iosSettings,
+          linux: linuxSettings,
+        );
 
-    // درخواست مجوزها
-    await _requestPermissions();
+        await _notifications!.initialize(
+          initSettings,
+          onDidReceiveNotificationResponse: _onNotificationTapped,
+        );
+
+        // درخواست مجوزها
+        await _requestPermissions();
+
+        _notificationSupported = true;
+        print('✅ System Notification پشتیبانی می‌شود');
+      } else {
+        print('⚠️ System Notification برای Windows پشتیبانی نمی‌شود، فقط از صدا و popup استفاده می‌شود');
+      }
+    } catch (e) {
+      print('⚠️ خطا در initialize notification (نادیده گرفته شد): $e');
+      _notificationSupported = false;
+    }
 
     // تنظیمات AudioPlayer
-    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-    await _audioPlayer.setVolume(1.0);
+    try {
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+      await _audioPlayer.setVolume(1.0);
+      print('✅ AudioPlayer initialized');
+    } catch (e) {
+      print('❌ خطا در initialize AudioPlayer: $e');
+    }
 
     _isInitialized = true;
     print('✅ NotificationService initialized');
   }
 
   Future<void> _requestPermissions() async {
-    // Android
-    final androidImplementation =
-        _notifications.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+    if (_notifications == null) return;
 
-    if (androidImplementation != null) {
-      await androidImplementation.requestNotificationsPermission();
-      await androidImplementation.requestExactAlarmsPermission();
-    }
+    try {
+      // Android
+      final androidImplementation =
+          _notifications!.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
 
-    // iOS
-    final iosImplementation = _notifications.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+      if (androidImplementation != null) {
+        await androidImplementation.requestNotificationsPermission();
+        await androidImplementation.requestExactAlarmsPermission();
+      }
 
-    if (iosImplementation != null) {
-      await iosImplementation.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-        critical: true, // برای notification های critical
-      );
+      // iOS
+      final iosImplementation = _notifications!.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+
+      if (iosImplementation != null) {
+        await iosImplementation.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+          critical: true, // برای notification های critical
+        );
+      }
+    } catch (e) {
+      print('⚠️ خطا در درخواست مجوزها (نادیده گرفته شد): $e');
     }
   }
 
@@ -87,10 +113,16 @@ class NotificationService {
       await initialize();
     }
 
-    // نمایش System Notification
-    await _showSystemNotification(order);
+    // نمایش System Notification (اگر پشتیبانی شود)
+    if (_notificationSupported) {
+      try {
+        await _showSystemNotification(order);
+      } catch (e) {
+        print('⚠️ خطا در نمایش System Notification: $e');
+      }
+    }
 
-    // شروع پخش صدای هشدار
+    // شروع پخش صدای هشدار (مهمترین بخش!)
     await _startAlarmSound();
 
     print('🚨 نمایش Notification برای سفارش #${order.id}');
@@ -132,57 +164,73 @@ class NotificationService {
       linux: linuxDetails,
     );
 
-    await _notifications.show(
-      order.id,
-      '🔥 سفارش جدید فوری! 🔥',
-      order.toString(),
-      notificationDetails,
-      payload: order.id.toString(),
-    );
+    if (_notifications != null) {
+      await _notifications!.show(
+        order.id,
+        '🔥 سفارش جدید فوری! 🔥',
+        order.toString(),
+        notificationDetails,
+        payload: order.id.toString(),
+      );
+    }
   }
 
   Future<void> _startAlarmSound() async {
-    if (_isSoundPlaying) return;
+    if (_isSoundPlaying) {
+      print('⚠️ صدا در حال پخش است');
+      return;
+    }
 
     _isSoundPlaying = true;
 
     try {
+      print('🔊 در حال تلاش برای پخش صدا از asset...');
+
+      // تنظیم ReleaseMode برای loop
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+      await _audioPlayer.setVolume(1.0);
+
       // پخش صدای هشدار از assets
-      // اگر فایل صوتی موجود نباشد، از صدای پیش‌فرض استفاده می‌کند
       await _audioPlayer.play(AssetSource('sounds/notification.mp3'));
 
-      // هر 5 ثانیه یکبار صدا را مجددا پخش می‌کند (برای loop)
-      _soundLoopTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
-        if (_isSoundPlaying) {
-          await _audioPlayer.play(AssetSource('sounds/notification.mp3'));
-        }
-      });
-
-      print('🔊 صدای هشدار شروع شد');
+      print('✅ صدای هشدار با موفقیت شروع شد (loop mode)');
     } catch (e) {
-      print('❌ خطا در پخش صدا: $e');
-      // اگر فایل صوتی پیدا نشد، از URL backup استفاده می‌کند
+      print('❌ خطا در پخش صدا از asset: $e');
+
+      // تلاش برای پخش از URL backup
       try {
+        print('🔊 تلاش برای پخش صدا از URL backup...');
+        await _audioPlayer.setReleaseMode(ReleaseMode.loop);
         await _audioPlayer.play(UrlSource(
             'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3'));
+        print('✅ صدای backup با موفقیت شروع شد');
       } catch (e2) {
         print('❌ خطا در پخش صدای backup: $e2');
+        _isSoundPlaying = false;
       }
     }
   }
 
   Future<void> stopAlarmSound() async {
     _isSoundPlaying = false;
-    _soundLoopTimer?.cancel();
-    _soundLoopTimer = null;
 
-    await _audioPlayer.stop();
-    print('🔇 صدای هشدار متوقف شد');
+    try {
+      await _audioPlayer.stop();
+      print('🔇 صدای هشدار متوقف شد');
+    } catch (e) {
+      print('⚠️ خطا در توقف صدا: $e');
+    }
   }
 
   Future<void> acknowledgeNotification(int orderId) async {
-    // حذف notification
-    await _notifications.cancel(orderId);
+    // حذف notification (اگر پشتیبانی شود)
+    if (_notifications != null) {
+      try {
+        await _notifications!.cancel(orderId);
+      } catch (e) {
+        print('⚠️ خطا در cancel notification: $e');
+      }
+    }
 
     // توقف صدا
     await stopAlarmSound();
@@ -196,7 +244,6 @@ class NotificationService {
   }
 
   void dispose() {
-    _soundLoopTimer?.cancel();
     _audioPlayer.dispose();
   }
 }
