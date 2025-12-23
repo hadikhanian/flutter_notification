@@ -1,0 +1,16 @@
+{
+  "reverb": {
+    "appKey": "local",
+    "host": "ws://127.0.0.1",
+    "port": 6001,
+    "channelName": "orders",
+    "eventName": "CreateOrderEvent"
+  },
+  "notes": {
+    "appKey": "کلید app از Laravel Reverb",
+    "host": "آدرس سرور WebSocket (با ws:// یا wss://)",
+    "port": "پورت سرور (پیش‌فرض 6001)",
+    "channelName": "نام channel که در Laravel broadcast می‌شود",
+    "eventName": "نام event که در Laravel تعریف شده"
+  }
+}
