@@ -15,7 +15,7 @@ void main() async {
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.normal,
-    title: 'سیستم اعلان سفارشات رستوران',
+    title: 'سیستم اعلان سفارشات',
   );
 
   await windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
         useMaterial3: true,
-        fontFamily: 'Vazirmatn', // فونت فارسی - نیاز به اضافه کردن به assets دارد
+        fontFamily: 'Vazir', // فونت فارسی - نیاز به اضافه کردن به assets دارد
       ),
       home: const MainScreen(),
     );
