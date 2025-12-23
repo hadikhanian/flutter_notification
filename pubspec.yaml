@@ -31,6 +31,12 @@ dependencies:
   # HTTP for initial connection
   http: ^1.1.2
 
+  # Storage for settings
+  shared_preferences: ^2.2.2
+
+  # URL launcher for opening orders
+  url_launcher: ^6.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -44,3 +50,10 @@ flutter:
   assets:
     - assets/sounds/
     - assets/images/
+
+  fonts:
+    - family: Vazir
+      fonts:
+        - asset: assets/fonts/Vazir.ttf
+        - asset: assets/fonts/Vazir-Bold.ttf
+          weight: 700
