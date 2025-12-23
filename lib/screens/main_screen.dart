@@ -384,7 +384,7 @@ class _MainScreenState extends State<MainScreen> {
                                     '${order.totalPrice.toStringAsFixed(0)} تومان',
                                   ),
                                   trailing: Text(
-                                    _formatTime(order.createdAt),
+                                    order.createdAt,
                                     style: const TextStyle(fontSize: 12),
                                   ),
                                   isThreeLine: true,
@@ -432,10 +432,6 @@ class _MainScreenState extends State<MainScreen> {
             }
           : null,
     );
-  }
-
-  String _formatTime(DateTime dateTime) {
-    return '${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   @override

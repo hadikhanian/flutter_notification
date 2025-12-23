@@ -8,7 +8,7 @@ class OrderEvent {
   final String customerName;
   final String orderDetails;
   final double totalPrice;
-  final DateTime createdAt;
+  final String createdAt; // تغییر به String برای دریافت مستقیم
 
   OrderEvent({
     required this.id,
@@ -25,6 +25,6 @@ class OrderEvent {
 
   @override
   String toString() {
-    return 'سفارش جدید #$id - $customerName - ${totalPrice.toStringAsFixed(0)} تومان';
+    return '$customerName - ${totalPrice.toStringAsFixed(0)} تومان';
   }
 }
