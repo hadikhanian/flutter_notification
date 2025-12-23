@@ -181,7 +181,7 @@ class _OrderNotificationPopupState extends State<OrderNotificationPopup>
                         const Divider(height: 20),
                         _buildInfoRow(
                           'زمان:',
-                          _formatDateTime(widget.order.createdAt),
+                          widget.order.createdAt,
                           Icons.access_time,
                         ),
                       ],
@@ -269,7 +269,4 @@ class _OrderNotificationPopupState extends State<OrderNotificationPopup>
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.year}/${dateTime.month}/${dateTime.day} - ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
 }
