@@ -13,8 +13,14 @@ class WebSocketService {
   StreamSubscription? _subscription;
   final StreamController<OrderEvent> _orderStreamController =
       StreamController<OrderEvent>.broadcast();
+  final StreamController<bool> _connectionStatusController =
+      StreamController<bool>.broadcast();
+  final StreamController<void> _pingEventController =
+      StreamController<void>.broadcast();
 
   Stream<OrderEvent> get orderStream => _orderStreamController.stream;
+  Stream<bool> get connectionStatusStream => _connectionStatusController.stream;
+  Stream<void> get pingEventStream => _pingEventController.stream;
 
   bool _isConnected = false;
   bool get isConnected => _isConnected;
@@ -80,6 +86,7 @@ class WebSocketService {
 
       print('✅ اتصال برقرار شد');
       _isConnected = true;
+      _connectionStatusController.add(true);
       _reconnectAttempts = 0; // ریست تعداد تلاش‌ها
 
       // شروع ping/heartbeat هر 30 ثانیه
@@ -87,6 +94,7 @@ class WebSocketService {
     } catch (e) {
       print('❌ خطا در اتصال: $e');
       _isConnected = false;
+      _connectionStatusController.add(false);
       _handleReconnect();
     }
   }
@@ -111,6 +119,7 @@ class WebSocketService {
       } else if (event == 'pusher:pong') {
         // پاسخ به ping
         print('💓 Pong دریافت شد');
+        _pingEventController.add(null);
       } else if (event == 'pusher:error') {
         // خطا از سمت سرور
         final errorData = data['data'];
@@ -156,12 +165,14 @@ class WebSocketService {
   void _onError(error) {
     print('❌ خطا در WebSocket: $error');
     _isConnected = false;
+    _connectionStatusController.add(false);
     _handleReconnect();
   }
 
   void _onDone() {
     print('🔌 اتصال WebSocket قطع شد');
     _isConnected = false;
+    _connectionStatusController.add(false);
     _pingTimer?.cancel();
     _handleReconnect();
   }
@@ -309,6 +320,7 @@ class WebSocketService {
       await _subscription?.cancel();
       await _channel?.sink.close();
       _isConnected = false;
+      _connectionStatusController.add(false);
       print('🔌 قطع اتصال از WebSocket');
     } catch (e) {
       print('❌ خطا در disconnect: $e');
@@ -320,6 +332,8 @@ class WebSocketService {
     _reconnectTimer?.cancel();
     _pingTimer?.cancel();
     _orderStreamController.close();
+    _connectionStatusController.close();
+    _pingEventController.close();
     disconnect();
   }
 }

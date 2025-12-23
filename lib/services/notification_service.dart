@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:io' show Platform;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../config/app_config.dart';
 import '../models/order_event.dart';
 
 class NotificationService {
@@ -167,7 +168,7 @@ class NotificationService {
     if (_notifications != null) {
       await _notifications!.show(
         order.id,
-        '🔥 سفارش جدید فوری! 🔥',
+        AppConfig.notificationTitle,
         order.toString(),
         notificationDetails,
         payload: order.id.toString(),
