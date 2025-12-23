@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:window_manager/window_manager.dart';
+import 'config/app_config.dart';
+import 'services/settings_service.dart';
 import 'screens/main_screen.dart';
 
 void main() async {
@@ -23,6 +26,9 @@ void main() async {
     await windowManager.focus();
   });
 
+  // Initialize settings service
+  await SettingsService().initialize();
+
   runApp(const MyApp());
 }
 
@@ -32,7 +38,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'سیستم اعلان سفارشات',
+      title: AppConfig.appTitle,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.orange,
