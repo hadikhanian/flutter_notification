@@ -96,7 +96,7 @@ class NotificationService {
   }
 
   Future<void> _showSystemNotification(OrderEvent order) async {
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'critical_orders',
       'سفارشات فوری',
       channelDescription: 'اعلان‌های فوری سفارشات جدید',
@@ -123,11 +123,9 @@ class NotificationService {
 
     const linuxDetails = LinuxNotificationDetails(
       urgency: LinuxNotificationUrgency.critical,
-      timeout: LinuxNotificationTimeout.fromSeconds(0), // تا زمان بستن توسط کاربر
-      category: LinuxNotificationCategory.imReceived(),
     );
 
-    const notificationDetails = NotificationDetails(
+    final notificationDetails = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
       linux: linuxDetails,
