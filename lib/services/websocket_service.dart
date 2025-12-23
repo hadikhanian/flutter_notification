@@ -29,6 +29,13 @@ class WebSocketService {
   String? _authToken;
   String? _authEndpoint;
 
+  // Reconnection
+  bool _shouldReconnect = true;
+  int _reconnectAttempts = 0;
+  final int _maxReconnectAttempts = 999; // تلاش بی‌نهایت
+  Timer? _reconnectTimer;
+  Timer? _pingTimer;
+
   Future<void> initialize({
     required String appKey,
     required String host,
@@ -46,7 +53,15 @@ class WebSocketService {
     _authEndpoint = authEndpoint;
     if (eventName != null) _eventName = eventName;
 
+    _shouldReconnect = true;
+    await _connect();
+  }
+
+  Future<void> _connect() async {
     try {
+      // لغو تایمر reconnect اگر وجود دارد
+      _reconnectTimer?.cancel();
+
       // ساخت WebSocket URL
       final scheme = _port == 443 || _port == 6001 ? 'wss' : 'ws';
       final wsUrl = Uri.parse('$scheme://$_host:$_port/app/$_appKey?protocol=7&client=js&version=8.0.0');
@@ -65,10 +80,14 @@ class WebSocketService {
 
       print('✅ اتصال برقرار شد');
       _isConnected = true;
+      _reconnectAttempts = 0; // ریست تعداد تلاش‌ها
+
+      // شروع ping/heartbeat هر 30 ثانیه
+      _startPingTimer();
     } catch (e) {
-      print('❌ خطا در initialize: $e');
+      print('❌ خطا در اتصال: $e');
       _isConnected = false;
-      rethrow;
+      _handleReconnect();
     }
   }
 
@@ -89,6 +108,14 @@ class WebSocketService {
         subscribeToChannel();
       } else if (event == 'pusher_internal:subscription_succeeded') {
         print('✅ عضویت موفق در channel: $_channelName');
+      } else if (event == 'pusher:pong') {
+        // پاسخ به ping
+        print('💓 Pong دریافت شد');
+      } else if (event == 'pusher:error') {
+        // خطا از سمت سرور
+        final errorData = data['data'];
+        print('❌ خطا از سرور: $errorData');
+        // اتصال ممکن است قطع شود
       } else if (event == _eventName) {
         // این event سفارش جدید است
         _handleOrderEvent(data);
@@ -129,11 +156,61 @@ class WebSocketService {
   void _onError(error) {
     print('❌ خطا در WebSocket: $error');
     _isConnected = false;
+    _handleReconnect();
   }
 
   void _onDone() {
     print('🔌 اتصال WebSocket قطع شد');
     _isConnected = false;
+    _pingTimer?.cancel();
+    _handleReconnect();
+  }
+
+  void _startPingTimer() {
+    _pingTimer?.cancel();
+    _pingTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (_isConnected && _channel != null) {
+        try {
+          final pingMessage = jsonEncode({'event': 'pusher:ping', 'data': {}});
+          _channel!.sink.add(pingMessage);
+          print('💓 Ping ارسال شد');
+        } catch (e) {
+          print('❌ خطا در ارسال ping: $e');
+        }
+      }
+    });
+  }
+
+  void _handleReconnect() {
+    if (!_shouldReconnect) {
+      print('⚠️ Reconnect غیرفعال است');
+      return;
+    }
+
+    if (_reconnectAttempts >= _maxReconnectAttempts) {
+      print('❌ حداکثر تلاش برای reconnect به پایان رسید');
+      return;
+    }
+
+    _reconnectAttempts++;
+    final delay = _getReconnectDelay();
+
+    print('🔄 تلاش برای reconnect #$_reconnectAttempts بعد از $delay ثانیه...');
+
+    _reconnectTimer?.cancel();
+    _reconnectTimer = Timer(Duration(seconds: delay), () {
+      _connect();
+    });
+  }
+
+  int _getReconnectDelay() {
+    // Exponential backoff: 1, 2, 4, 8, 16, 30 (max)
+    if (_reconnectAttempts <= 1) return 1;
+    if (_reconnectAttempts == 2) return 2;
+    if (_reconnectAttempts == 3) return 4;
+    if (_reconnectAttempts == 4) return 8;
+    if (_reconnectAttempts == 5) return 16;
+    return 30; // حداکثر 30 ثانیه
   }
 
   Future<void> subscribeToChannel() async {
@@ -224,6 +301,10 @@ class WebSocketService {
   }
 
   Future<void> disconnect() async {
+    _shouldReconnect = false; // غیرفعال کردن reconnection
+    _reconnectTimer?.cancel();
+    _pingTimer?.cancel();
+
     try {
       await _subscription?.cancel();
       await _channel?.sink.close();
@@ -235,6 +316,9 @@ class WebSocketService {
   }
 
   void dispose() {
+    _shouldReconnect = false;
+    _reconnectTimer?.cancel();
+    _pingTimer?.cancel();
     _orderStreamController.close();
     disconnect();
   }
