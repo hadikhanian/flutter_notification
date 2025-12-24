@@ -29,12 +29,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _initializeControllers() {
     _appKeyController = TextEditingController(text: _settingsService.appKey ?? '');
-    _hostController = TextEditingController(text: _settingsService.host ?? '');
+    _hostController = TextEditingController(text: _settingsService.host ?? 'ws1.binacity.com');
     _portController = TextEditingController(text: _settingsService.port?.toString() ?? '443');
-    _channelController = TextEditingController(text: _settingsService.channelName ?? '');
+    _channelController = TextEditingController(text: _settingsService.channelName ?? 'private-Ecommerce.Orders.All');
     _eventNameController = TextEditingController(text: _settingsService.eventName ?? 'CreateOrderEvent');
     _authTokenController = TextEditingController(text: _settingsService.authToken ?? '');
-    _baseUrlController = TextEditingController(text: _settingsService.baseUrl ?? '');
+    _baseUrlController = TextEditingController(text: _settingsService.baseUrl ?? 'https://test.binacity.com');
   }
 
   Future<void> _saveSettings() async {

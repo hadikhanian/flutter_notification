@@ -38,6 +38,7 @@ dependencies:
 
   # URL launcher for opening orders
   url_launcher: ^6.2.2
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -45,6 +46,12 @@ dev_dependencies:
   flutter_lints: ^3.0.0
   build_runner: ^2.4.7
   json_serializable: ^6.7.1
+
+flutter_launcher_icons:
+  window: true
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"
 
 flutter:
   uses-material-design: true

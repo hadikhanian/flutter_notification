@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// تنظیمات قابل تغییر برنامه
 class AppConfig {
   // عنوان برنامه
-  static const String appTitle = 'سیستم اعلان';
+  static const String appTitle = 'سیستم اعلان سفارشات';
 
   // عنوان نوتیفیکیشن
   static const String notificationTitle = 'سفارش جدید';
