@@ -40,11 +40,26 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: AppConfig.appTitle,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.orange,
-        useMaterial3: true,
-        fontFamily: 'Vazir', // فونت فارسی - نیاز به اضافه کردن به assets دارد
-      ),
+      theme: AppConfig.getTheme(),
+
+      // RTL support
+      locale: const Locale('fa', 'IR'),
+      supportedLocales: const [
+        Locale('fa', 'IR'),
+        Locale('en', 'US'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      builder: (context, child) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: child!,
+        );
+      },
+
       home: const MainScreen(),
     );
   }
