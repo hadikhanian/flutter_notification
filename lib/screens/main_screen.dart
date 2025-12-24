@@ -16,7 +16,7 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _appKeyController = TextEditingController();
   final _hostController = TextEditingController(text: 'ws1.binacity.com');
@@ -466,6 +466,13 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void dispose() {
+    _appKeyController.dispose();
+    _hostController.dispose();
+    _portController.dispose();
+    _channelController.dispose();
+    _eventNameController.dispose();
+    _authTokenController.dispose();
+    _authEndpointController.dispose();
     _pingAnimationController.dispose();
     _wsService.dispose();
     _notificationService.dispose();
