@@ -18,7 +18,7 @@ void main() async {
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.normal,
-    title: 'سیستم اعلان سفارشات',
+    title: 'سیستم اعلان سفارشات پلتفرم بینا',
   );
 
   await windowManager.waitUntilReadyToShow(windowOptions, () async {

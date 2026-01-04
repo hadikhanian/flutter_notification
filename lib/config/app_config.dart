@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// تنظیمات قابل تغییر برنامه
 class AppConfig {
   // عنوان برنامه
-  static const String appTitle = 'سیستم اعلان سفارشات';
+  static const String appTitle = 'سیستم اعلان سفارشات پتلفرم بینا';
 
   // عنوان نوتیفیکیشن
   static const String notificationTitle = 'سفارش جدید';
@@ -12,18 +12,18 @@ class AppConfig {
   static const String acknowledgeButtonText = 'دیدم، شروع می‌کنم';
 
   // رنگ‌ها
-  static const Color primaryColor = Color(0xFFFF4500); // نارنجی-قرمز
-  static const Color accentColor = Color(0xFFFF6347); // قرمز گوجه‌ای
-  static const Color criticalColor = Color(0xFFFF0000); // قرمز
-  static const Color successColor = Color(0xFF4CAF50); // سبز
-  static const Color warningColor = Color(0xFFFFC107); // زرد
-  static const Color backgroundColor = Color(0xFFF5F5F5); // خاکستری روشن
+  static const Color primaryColor = Color(0xFF006939);
+  static const Color accentColor = Color(0xFF197D4F); 
+  static const Color criticalColor = Color(0xFFFF0000); 
+  static const Color successColor = Color(0xFF4CAF50); 
+  static const Color warningColor = Color(0xFFFFC107);
+  static const Color backgroundColor = Color(0xFFF5F5F5);
 
   // گرادینت برای popup
   static const List<Color> popupGradient = [
-    Color(0xFFFF0000),
-    Color(0xFFFF4500),
-    Color(0xFFFF6347),
+    Color(0xFF00542D),
+    Color(0xFF006939),
+    Color(0xFF197D4F),
   ];
 
   // اندازه‌ها
@@ -36,7 +36,7 @@ class AppConfig {
   static const Duration reconnectMaxDelay = Duration(seconds: 30);
 
   // فونت
-  static const String fontFamily = 'Vazir';
+  static const String fontFamily = 'Dana';
 
   // آیکون‌ها
   static const IconData orderIcon = Icons.shopping_bag;

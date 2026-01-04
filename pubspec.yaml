@@ -61,8 +61,8 @@ flutter:
     - assets/images/
 
   fonts:
-    - family: Vazir
+    - family: Dana
       fonts:
-        - asset: assets/fonts/Vazir.ttf
-        - asset: assets/fonts/Vazir-Bold.ttf
+        - asset: assets/fonts/Dana.ttf
+        - asset: assets/fonts/Dana-Bold.ttf
           weight: 700
